@@ -17,6 +17,8 @@ function createWindow() {
     }
   });
 
+  // ✅ ADD THIS LINE HERE
+  mainWindow.setBackgroundThrottling(false);
   mainWindow.loadFile("renderer/index.html");
 
   mainWindow.once("ready-to-show", () => {
@@ -27,7 +29,7 @@ function createWindow() {
   mainWindow.on("close", (e) => {
     if (!isQuitting) {
       e.preventDefault();
-      mainWindow.hide();
+      mainWindow.minimize(); // ✅ NOT hide
     }
   });
 }

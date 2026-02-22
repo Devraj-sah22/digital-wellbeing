@@ -1,34 +1,74 @@
 // tracker/activityTracker.js
+
+const activeWin = require("active-win");
+
 let mainWindow = null;
 let intervalId = null;
 
 const appUsage = {};
-let currentApp = "Chrome";
-let seconds = 0;
+let currentApp = null;
+let lastSwitchTime = Date.now();
 
-/**
- * Simulation-based tracking
- * (Used due to OS-level restrictions on Windows)
- */
-function startTracking(win) {
+async function startTracking(win) {
   if (intervalId) return;
 
-  console.log("🚀 Tracking started (SIMULATION MODE)");
+  console.log("🚀 Real OS Tracking Started");
   mainWindow = win;
 
-  intervalId = setInterval(() => {
-    seconds++;
+  intervalId = setInterval(async () => {
+    const now = Date.now();
 
-    // Simulate app switch every 10 seconds
-    if (seconds % 10 === 0) {
-      currentApp = currentApp === "Chrome" ? "VSCode" : "Chrome";
+    let active;
+    try {
+      active = await activeWin();
+    } catch (err) {
+      console.error("Active window error:", err);
+      return;
     }
 
-    appUsage[currentApp] = (appUsage[currentApp] || 0) + 1;
+    if (!active || !active.owner) return;
+
+    // ✅ REAL app name (Notepad, Chrome, VS Code, etc.)
+    const appName =
+      active.owner.name ||
+      active.owner.processName ||
+      "Unknown";
+    // ❌ IGNORE DIGITAL WELLBEING (Electron itself)
+    if (
+      appName.toLowerCase().includes("electron") ||
+      active.title?.includes("Digital Wellbeing")
+    ) {
+      return; // <-- IMPORTANT
+    }
+
+    // FIRST TIME
+    if (!currentApp) {
+      currentApp = appName;
+      lastSwitchTime = now;
+      return;
+    }
+
+    // APP SWITCHED
+    if (appName !== currentApp) {
+      const timeSpent = Math.floor((now - lastSwitchTime) / 1000);
+
+      appUsage[currentApp] =
+        (appUsage[currentApp] || 0) + timeSpent;
+
+      currentApp = appName;
+      lastSwitchTime = now;
+    }
+
+    // LIVE UPDATE (running app included)
+    const liveUsage = { ...appUsage };
+    const runningTime = Math.floor((now - lastSwitchTime) / 1000);
+
+    liveUsage[currentApp] =
+      (liveUsage[currentApp] || 0) + runningTime;
 
     mainWindow.webContents.send("usage-update", {
       currentApp,
-      appUsage
+      appUsage: liveUsage
     });
   }, 1000);
 }
