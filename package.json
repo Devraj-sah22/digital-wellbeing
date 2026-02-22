@@ -1,0 +1,13 @@
+{
+  "name": "digital-wellbeing",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "electron": "^30.0.0",
+    "active-win": "^9.0.0",
+    "chart.js": "^4.4.1"
+  }
+}

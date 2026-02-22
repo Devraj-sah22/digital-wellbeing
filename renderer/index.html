@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Digital Wellbeing</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="glass-container">
+    <h1>🧠 Digital Wellbeing</h1>
+
+    <button id="startBtn">Start Tracking</button>
+
+    <div class="stats">
+      <div class="card">
+        <h3>Current App</h3>
+        <p id="currentApp">None</p>
+      </div>
+    </div>
+
+    <div class="charts">
+      <div class="card">
+        <h3>App Usage (Bar)</h3>
+        <canvas id="barChart"></canvas>
+      </div>
+
+      <div class="card">
+        <h3>Usage Distribution (Pie)</h3>
+        <canvas id="pieChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ MODULE SCRIPT -->
+  <script type="module" src="renderer.js"></script>
+</body>
+</html>
