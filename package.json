@@ -6,8 +6,9 @@
     "start": "electron ."
   },
   "dependencies": {
-    "electron": "^30.0.0",
-    "active-win": "^9.0.0",
-    "chart.js": "^4.4.1"
+    "electron": "^30.0.0"
+  },
+  "devDependencies": {
+    "electron-rebuild": "^3.2.9"
   }
 }

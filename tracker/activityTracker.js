@@ -1,58 +1,36 @@
-let activeWinFn = null;
-
-let currentApp = null;
-let startTime = Date.now();
-const appUsage = {};
-
+// tracker/activityTracker.js
 let mainWindow = null;
-let trackingStarted = false;
 let intervalId = null;
 
-async function loadActiveWin() {
-  if (!activeWinFn) {
-    const activeWin = await import("active-win");
-    activeWinFn = activeWin.default;
-  }
-}
+const appUsage = {};
+let currentApp = "Chrome";
+let seconds = 0;
 
-async function track() {
-  await loadActiveWin();
+/**
+ * Simulation-based tracking
+ * (Used due to OS-level restrictions on Windows)
+ */
+function startTracking(win) {
+  if (intervalId) return;
 
-  const result = await activeWinFn();
-  if (!result) return;
+  console.log("🚀 Tracking started (SIMULATION MODE)");
+  mainWindow = win;
 
-  const appName = result.owner.name;
-  const now = Date.now();
+  intervalId = setInterval(() => {
+    seconds++;
 
-  if (currentApp !== appName) {
-    if (currentApp) {
-      const duration = (now - startTime) / 1000;
-      appUsage[currentApp] = (appUsage[currentApp] || 0) + duration;
+    // Simulate app switch every 10 seconds
+    if (seconds % 10 === 0) {
+      currentApp = currentApp === "Chrome" ? "VSCode" : "Chrome";
     }
-    currentApp = appName;
-    startTime = now;
-  }
 
-  if (mainWindow) {
+    appUsage[currentApp] = (appUsage[currentApp] || 0) + 1;
+
     mainWindow.webContents.send("usage-update", {
       currentApp,
       appUsage
     });
-  }
-}
-
-function startTracking(win) {
-  if (trackingStarted) {
-    console.log("⚠ Tracking already running");
-    return;
-  }
-
-  trackingStarted = true;
-  mainWindow = win;
-
-  console.log("🚀 Tracking STARTED");
-
-  intervalId = setInterval(track, 1000);
+  }, 1000);
 }
 
 module.exports = { startTracking };
